@@ -2,16 +2,16 @@
 # Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 # Click nbfs://nbhost/SystemFileSystem/Templates/Other/Dockerfile to edit this template
 
-FROM gradle:4.7.0-jdk8-alpine AS build
+FROM gradle:jdk21-corretto AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN gradle build --no-daemon 
+RUN gradle clean bootjar 
 
-FROM openjdk:8-jre-slim
+FROM amazoncorretto:21
 
 EXPOSE 8080
 RUN mkdir /app
 
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/spring-boot-application.jar
 
-ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/spring-boot-application.jar"]
+ENTRYPOINT ["java","-jar","/app/spring-boot-application.jar"]
